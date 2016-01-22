@@ -38,13 +38,15 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>  {
 
                     totalItemCount = linearLayoutManager.getItemCount();
                     lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition();
-                    if (!loading && totalItemCount <= (lastVisibleItem + visibleThreshold)) {
+                    if (totalItemCount <= (lastVisibleItem + visibleThreshold)) {
                         // End has been reached
                         // Do something
                         if (onLoadMoreListener != null) {
                             onLoadMoreListener.onLoadMore();
                         }
-                        loading = true;
+                        if (linearLayoutManager.findLastCompletelyVisibleItemPosition() != MyAdapter.this.getItemCount() - 1) {
+                            loading = true;
+                        }
                     }
                 }
             });
@@ -53,7 +55,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>  {
 
     @Override
     public int getItemViewType(int position) {
-        return mDataset.get(position) != null ? VIEW_ITEM : VIEW_PROG;
+        return mDataset.get(position) != MainActivity.PROGRESS_BAR ? VIEW_ITEM : VIEW_PROG;
     }
 
     @Override

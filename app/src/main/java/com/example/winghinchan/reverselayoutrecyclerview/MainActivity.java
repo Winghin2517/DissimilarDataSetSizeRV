@@ -14,7 +14,8 @@ public class MainActivity extends AppCompatActivity {
     LinearLayoutManager llm;
     MyAdapter mAdapter;
     ArrayList<String> myDataset = new ArrayList<>();
-
+    final static String PROGRESS_BAR = "progressBar";
+    boolean progressBarAdded;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,24 +35,34 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLoadMore() {
                 //add progress item
-                myDataset.add(null);
-                mAdapter.notifyItemInserted(myDataset.size() - 1);
+                //we can scroll and progress bar is not yet added
+                if (!progressBarAdded && llm.findLastCompletelyVisibleItemPosition() != mAdapter.getItemCount() - 1) {
+                    progressBarAdded = true;
+                    myDataset.add(PROGRESS_BAR);
+                    mAdapter.notifyItemInserted(myDataset.size() - 1);
+                }
+
                 Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         //remove progress item
-                        myDataset.remove(myDataset.size() - 1);
-                        mAdapter.notifyItemRemoved(myDataset.size());
+                        boolean removed = myDataset.remove(PROGRESS_BAR);
+                        if (removed) {
+                            mAdapter.notifyItemRemoved(myDataset.size());
+                            progressBarAdded = false; //progress bar is now removed
+                        }
                         //add items one by one
-                        for (int i = 0; i < 1; i++) {
+                        for (int i = 0; i < 3; i++) {
                             myDataset.add("Item" + (myDataset.size() + 1));
                             mAdapter.notifyItemInserted(myDataset.size());
                         }
+                    //we can scroll
+                    if(llm.findLastCompletelyVisibleItemPosition()!=mAdapter.getItemCount()-1) {
                         mAdapter.setLoaded();
-                        //or you can add all at once but do not forget to call mAdapter.notifyDataSetChanged();
                     }
-                }, 2000);
+                }
+            }, 500);
                 System.out.println("load");
             }
         });
